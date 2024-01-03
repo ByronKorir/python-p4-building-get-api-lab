@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from models import db, Bakery, BakedGood
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
@@ -20,19 +20,35 @@ def index():
 
 @app.route('/bakeries')
 def bakeries():
-    return ''
+    bakeries = [bakery.to_dict() for bakery in Bakery.query.all()]
+    # bakeries_dict = bakery.to_dict()
+    response = make_response(jsonify(bakeries),200)
+    response.headers['Content-Type'] = 'application/json'
+
+    return response
 
 @app.route('/bakeries/<int:id>')
 def bakery_by_id(id):
-    return ''
+    bakery = Bakery.query.filter_by(id=id).first()
+    bakery_dict = bakery.to_dict()
+    response = make_response(jsonify(bakery_dict),200)
+    response.headers['Content-Type'] = 'application/json'
+
+    return response
 
 @app.route('/baked_goods/by_price')
 def baked_goods_by_price():
-    return ''
+    baked_goods = [baked_good.to_dict() for baked_good in BakedGood.query.order_by(BakedGood.price.desc()).all()]
+    response = make_response(jsonify(baked_goods),200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 @app.route('/baked_goods/most_expensive')
 def most_expensive_baked_good():
-    return ''
-
+    baked_good = BakedGood.query.order_by(BakedGood.price.desc()).first()
+    baked_good_dict = baked_good.to_dict()
+    response = make_response(jsonify(baked_good_dict),200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
